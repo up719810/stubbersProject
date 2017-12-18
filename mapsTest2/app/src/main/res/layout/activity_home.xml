@@ -7,4 +7,14 @@
     android:background="@color/colorPrimary"
     tools:context="com.example.williamdunnett.mapstest2.HomeActivity">
 
+
+    <ImageView
+        android:layout_width="354dp"
+        android:layout_height="108dp"
+        android:layout_gravity="center_vertical"
+        android:background="@color/colorWhite"
+        android:src="@drawable/logo"
+        tools:layout_editor_absoluteX="15dp"
+        tools:layout_editor_absoluteY="95dp" />
+
 </android.support.constraint.ConstraintLayout>
