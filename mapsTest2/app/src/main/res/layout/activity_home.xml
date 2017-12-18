@@ -15,6 +15,6 @@
         android:background="@color/colorWhite"
         android:src="@drawable/logo"
         tools:layout_editor_absoluteX="15dp"
-        tools:layout_editor_absoluteY="95dp" />
+        tools:layout_editor_absoluteY="191dp" />
 
 </android.support.constraint.ConstraintLayout>
