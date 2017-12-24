@@ -22,6 +22,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -40,6 +41,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.security.Provider;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -84,7 +87,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     //onResponse gets called when the api and server return the data
                     @Override
                     public void onResponse(JSONObject response) {
+
                         try {
+                            int result = response.getInt("userID");    //result is key for which you need to retrieve data
+                            Log.d("Result", "userID: " + result);
+                        } catch (JSONException e) {
+                            // TODO Auto-generated catch block
+                            e.printStackTrace();
+                        }
+
+
+                        /**
                             JSONArray users = response.getJSONArray("students");
 
                             //This loop iterates through the 'students' json array from the server and gets an
@@ -95,8 +108,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                 String usersName = user.getString("usersName");
                                 int sizeOfParty = user.getInt("sizeOfParty");
                                 String typeOfUser = user.getString("typeOfUser");
-                                String date = user.getString("date");
-                                String time = user.getString("time");
+                                Long date = user.getLong("date");
                                 int userID = user.getInt("userID");
 
                                 Log.d("Result", "usersname = " + usersName +
@@ -106,9 +118,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                             }
 
+
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                         **/
+
 
                     }
                 }, new Response.ErrorListener() {
@@ -116,7 +131,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void onErrorResponse(VolleyError error) {
 
                     }
-                });
+                }){
+                    //This is where you put together the contents of the JSON request body sent to the server
+                    @Override
+                    protected Map<String,String> getParams(){
+                        Map<String,String> params = new HashMap<String, String>();
+                        params.put("usersName","Eric");
+                        params.put("sizeOfParty","3");
+                        params.put("typeOfUser", "Walking");
+
+                        return params;
+                    }
+
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String,String> params = new HashMap<String, String>();
+                        params.put("Content-Type","application/x-www-form-urlencoded");
+                        return params;
+                    }
+                };
                 //This is the end of the volley request
 
 
