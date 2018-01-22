@@ -4,4 +4,21 @@
     <string name="insert_name">insert name here</string>
     <string name="insert_type_movement">choose way of moving</string>
     <string name="insert_group_size">insert_group_size</string>
+    <string name="types_movement_prompt">Choose a country</string>
+    <string name="number_group_prompt">Choose a size of group</string>
+
+    <string-array name="types_movement_array">
+        <item>Walking</item>
+        <item>Cycling</item>
+        <item>Wheelchair</item>
+    </string-array>
+
+    <string-array name="number_group_array">
+        <item>1</item>
+        <item>2</item>
+        <item>3</item>
+        <item>4</item>
+        <item>5</item>
+        <item>6</item>
+    </string-array>
 </resources>

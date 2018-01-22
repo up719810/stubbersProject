@@ -21,6 +21,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,7 +54,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationManager locationManager;
     private static final int REQUEST_LOCATION = 1;
     private Button get_loc_btn, newUserbtn;
-    private EditText name, sizeGroup, typeMovement;
+    private EditText name;
+    private Spinner typeMovement, sizeGroup;
     public Criteria criteria;
     public String bestProvider;
     RequestQueue requestQueue;
@@ -86,8 +88,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         spinner = (ProgressBar)findViewById(R.id.progressBar1);
         name = (EditText)findViewById(R.id.insertName);
-        sizeGroup = (EditText)findViewById(R.id.insert_group_size);
-        typeMovement = (EditText)findViewById(R.id.insertMovement);
+        sizeGroup = (Spinner) findViewById(R.id.insert_group_size);
+        typeMovement = (Spinner) findViewById(R.id.insertMovement);
 
 
         newUserbtn = (Button)  findViewById(R.id.newUserbtn);
@@ -98,8 +100,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.d("onCreate", "newUserbtn pressed");
                 spinner.setVisibility(View.VISIBLE);
                 nameUser = name.getText().toString();
-                sizeGroupUser = sizeGroup.getText().toString();
-                typeMovementUser = typeMovement.getText().toString();
+                sizeGroupUser = String.valueOf(sizeGroup.getSelectedItem());
+                typeMovementUser = String.valueOf(typeMovement.getSelectedItem());
 
 
                 StringRequest jsonObjRequest = new StringRequest(Request.Method.POST,
@@ -108,8 +110,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             @Override
                             public void onResponse(String response) {
                                 Log.d("Result", "response: " + response);
-                                int result = response.indexOf(0);    //result is key for which you need to retrieve data
-                                Log.d("Result", "userID: " + result);
+
+                                try {
+                                    JSONObject obj = new JSONObject(response);
+                                    Log.d("Result", obj.toString());
+                                    int result = obj.getInt("userID");    //result is key for which you need to retrieve data
+                                    Log.d("Result", "userID: " + result);
+
+                                    //TODO store userID in userPrefs for use in post coordinates
+                                } catch (Throwable t) {
+                                    Log.e("My App", "Could not parse malformed JSON: \"" + response + "\"");
+                                }
+
                                 spinner.setVisibility(View.GONE);
                                 requestQueue.stop();
 
