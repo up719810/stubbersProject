@@ -108,8 +108,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             @Override
                             public void onResponse(String response) {
                                 Log.d("Result", "response: " + response);
-//                                int result = xresponse.("userID");    //result is key for which you need to retrieve data
-//                                Log.d("Result", "userID: " + result);
+                                int result = response.indexOf(0);    //result is key for which you need to retrieve data
+                                Log.d("Result", "userID: " + result);
                                 spinner.setVisibility(View.GONE);
                                 requestQueue.stop();
 
