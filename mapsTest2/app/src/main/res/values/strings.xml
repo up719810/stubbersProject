@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">mapsTest2</string>
     <string name="title_activity_maps">Map</string>
+    <string name="insert_name">insert name here</string>
+    <string name="insert_type_movement">choose way of moving</string>
+    <string name="insert_group_size">insert_group_size</string>
 </resources>

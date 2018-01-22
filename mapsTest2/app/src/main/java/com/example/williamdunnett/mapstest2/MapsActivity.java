@@ -19,6 +19,8 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,6 +30,7 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -50,17 +53,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LocationManager locationManager;
     private static final int REQUEST_LOCATION = 1;
     private Button get_loc_btn, newUserbtn;
+    private EditText name, sizeGroup, typeMovement;
     public Criteria criteria;
     public String bestProvider;
     RequestQueue requestQueue;
+    private ProgressBar spinner;
 
-    String newUserIDURL = "http://10.128.117.1/tutorial/newUserID.php";
+
+    String newUserIDURL = "http://10.128.116.25/tutorial/newUserID.php";
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
+        requestQueue = Volley.newRequestQueue(getApplicationContext());
+
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -75,92 +84,72 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
+        spinner = (ProgressBar)findViewById(R.id.progressBar1);
+        name = (EditText)findViewById(R.id.insertName);
+        sizeGroup = (EditText)findViewById(R.id.insert_group_size);
+        typeMovement = (EditText)findViewById(R.id.insertMovement);
+
+
         newUserbtn = (Button)  findViewById(R.id.newUserbtn);
         newUserbtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                final String nameUser, sizeGroupUser, typeMovementUser;
                 // Do something in response to newUserbtn click
                 Log.d("onCreate", "newUserbtn pressed");
-
-                //This is how to create a request using the Volley library
-                JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,
-                        newUserIDURL, new Response.Listener<JSONObject>() {
-                    //onResponse gets called when the api and server return the data
-                    @Override
-                    public void onResponse(JSONObject response) {
-
-                        try {
-                            int result = response.getInt("userID");    //result is key for which you need to retrieve data
-                            Log.d("Result", "userID: " + result);
-                        } catch (JSONException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
+                spinner.setVisibility(View.VISIBLE);
+                nameUser = name.getText().toString();
+                sizeGroupUser = sizeGroup.getText().toString();
+                typeMovementUser = typeMovement.getText().toString();
 
 
-                        /**
-                            JSONArray users = response.getJSONArray("students");
-
-                            //This loop iterates through the 'students' json array from the server and gets an
-                            //individual item, then gets all the info from it
-                            for (int i = 0; i < users.length(); i++){
-                                JSONObject user = users.getJSONObject(i);
-
-                                String usersName = user.getString("usersName");
-                                int sizeOfParty = user.getInt("sizeOfParty");
-                                String typeOfUser = user.getString("typeOfUser");
-                                Long date = user.getLong("date");
-                                int userID = user.getInt("userID");
-
-                                Log.d("Result", "usersname = " + usersName +
-                                        " sizeOfParty = " + sizeOfParty + " typeOfUser = " +
-                                        typeOfUser + " date = " + date + " time = " + time +
-                                        " userID " + userID);
+                StringRequest jsonObjRequest = new StringRequest(Request.Method.POST,
+                        newUserIDURL,
+                        new Response.Listener<String>() {
+                            @Override
+                            public void onResponse(String response) {
+                                Log.d("Result", "response: " + response);
+//                                int result = xresponse.("userID");    //result is key for which you need to retrieve data
+//                                Log.d("Result", "userID: " + result);
+                                spinner.setVisibility(View.GONE);
+                                requestQueue.stop();
 
                             }
+                        }, new Response.ErrorListener() {
 
-
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                         **/
-
-
-                    }
-                }, new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-
+                        Log.d("Result", "something went wrong");
+                        requestQueue.stop();
                     }
-                }){
-                    //This is where you put together the contents of the JSON request body sent to the server
-                    @Override
-                    protected Map<String,String> getParams(){
-                        Map<String,String> params = new HashMap<String, String>();
-                        params.put("usersName","Eric");
-                        params.put("sizeOfParty","3");
-                        params.put("typeOfUser", "Walking");
+                }) {
 
-                        return params;
+                    @Override
+                    public String getBodyContentType() {
+                        return "application/x-www-form-urlencoded; charset=UTF-8";
                     }
 
                     @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String,String> params = new HashMap<String, String>();
-                        params.put("Content-Type","application/x-www-form-urlencoded");
-                        return params;
+                    protected Map<String, String> getParams() throws AuthFailureError {
+
+
+                        Map<String, String> postParam = new HashMap<String, String>();
+
+                        postParam.put("usersName",nameUser);
+                        postParam.put("sizeOfParty",sizeGroupUser);
+                        postParam.put("typeOfUser", typeMovementUser);
+
+                        return postParam;
                     }
+
                 };
-                //This is the end of the volley request
 
+                requestQueue.add(jsonObjRequest);
 
-                //This is the line that adds the request to the volley request que which then automatically runs when possible
-                requestQueue.add(jsonObjectRequest);
-
-            }
+                }
         });
 
 
-        requestQueue = Volley.newRequestQueue(getApplicationContext());
+
 
 
     }
