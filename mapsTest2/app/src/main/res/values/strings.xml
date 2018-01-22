@@ -6,6 +6,8 @@
     <string name="insert_group_size">insert_group_size</string>
     <string name="types_movement_prompt">Choose a country</string>
     <string name="number_group_prompt">Choose a size of group</string>
+    <string name="new_user_btn">New User</string>
+    <string name="show_location_btn">Show Location</string>
 
     <string-array name="types_movement_array">
         <item>Walking</item>
