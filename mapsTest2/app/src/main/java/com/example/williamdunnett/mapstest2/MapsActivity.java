@@ -2,9 +2,11 @@ package com.example.williamdunnett.mapstest2;
 
 import android.Manifest;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Criteria;
 import android.location.Location;
@@ -62,7 +64,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ProgressBar spinner;
 
 
-    String newUserIDURL = "http://10.128.116.150/tutorial/newUserID.php";
+    String newUserIDURL = "http://10.128.116.120/tutorial/newUserID.php";
 
 
     @Override
@@ -71,6 +73,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
         requestQueue = Volley.newRequestQueue(getApplicationContext());
 
+        final SharedPreferences prefs = this.getSharedPreferences(
+                "com.example.williamdunnett.mapstest2", Context.MODE_PRIVATE);
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -83,6 +87,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // Do something in response to button click
                 Log.d("onCreate", "button pressed");
                 getLocation();
+
+                int userIDTest = prefs.getInt("usersID", 0 );
+                Log.d("onCreate", String.valueOf(userIDTest));
             }
         });
 
@@ -113,10 +120,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                                 try {
                                     JSONObject obj = new JSONObject(response);
-                                    Log.d("Result", obj.toString());
-                                    int result = obj.getInt("userID");    //result is key for which you need to retrieve data
-                                    Log.d("Result", "userID: " + result);
-
+                                    //Log.d("Result", obj.toString());
+                                    int resultID = obj.getInt("userID");    //result is key for which you need to retrieve data
+                                    //Log.d("Result", "userID: " + resultID);
+                                    prefs.edit().putInt("usersID", resultID).apply();
                                     //TODO store userID in userPrefs for use in post coordinates
                                 } catch (Throwable t) {
                                     Log.e("My App", "Could not parse malformed JSON: \"" + response + "\"");
@@ -124,7 +131,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                                 spinner.setVisibility(View.GONE);
                                 requestQueue.stop();
-
                             }
                         }, new Response.ErrorListener() {
 
@@ -189,6 +195,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
        // getLocation();
     }
+
+    @Override
+    protected void onStart()
+    {
+        super.onStart();
+
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.new_user_dialog);
+        dialog.setTitle("Dialog box");
+
+        Button button = (Button) dialog.findViewById(R.id.newUserbtn);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
 
     protected void getLocation() {
         if (isLocationEnabled(MapsActivity.this)) {

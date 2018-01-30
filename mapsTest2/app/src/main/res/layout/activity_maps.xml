@@ -9,31 +9,39 @@
     android:orientation="vertical"
     tools:context="com.example.williamdunnett.mapstest2.MapsActivity">
 
-    <EditText
-        android:layout_width="200dp"
-        android:layout_height="40dp"
-        android:text="@string/insert_name"
-        android:id="@+id/insertName"/>
-
-    <Spinner
-        android:id="@+id/insertMovement"
-        android:layout_width="match_parent"
+    <android.support.v7.widget.LinearLayoutCompat
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:entries="@array/types_movement_array"
-        android:prompt="@string/types_movement_prompt" />
+        android:id="@+id/newUserView"
+        android:visibility="gone">
 
-    <Spinner
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/insert_group_size"
-        android:entries="@array/number_group_array"
-        android:prompt="@string/number_group_prompt"/>
+        <EditText
+            android:layout_width="200dp"
+            android:layout_height="40dp"
+            android:text="@string/insert_name"
+            android:id="@+id/insertName"/>
 
-    <Button
-        android:id="@+id/newUserbtn"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/new_user_btn" />
+        <Spinner
+            android:id="@+id/insertMovement"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:entries="@array/types_movement_array"
+            android:prompt="@string/types_movement_prompt" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/insert_group_size"
+            android:entries="@array/number_group_array"
+            android:prompt="@string/number_group_prompt"/>
+
+        <Button
+            android:id="@+id/newUserbtn"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/new_user_btn" />
+    </android.support.v7.widget.LinearLayoutCompat>
+
 
     <android.support.v7.widget.AppCompatButton
         android:id="@+id/button1"

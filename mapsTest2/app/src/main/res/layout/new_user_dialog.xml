@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <EditText
+        android:layout_width="200dp"
+        android:layout_height="40dp"
+        android:text="@string/insert_name"
+        android:id="@+id/insertName"/>
+
+    <Spinner
+        android:id="@+id/insertMovement"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:entries="@array/types_movement_array"
+        android:prompt="@string/types_movement_prompt" />
+
+    <Spinner
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/insert_group_size"
+        android:entries="@array/number_group_array"
+        android:prompt="@string/number_group_prompt"/>
+
+    <Button
+        android:id="@+id/newUserbtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/new_user_btn" />
+
+</android.support.constraint.ConstraintLayout>
