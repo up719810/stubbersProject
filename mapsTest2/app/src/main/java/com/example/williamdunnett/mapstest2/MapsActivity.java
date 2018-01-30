@@ -62,7 +62,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ProgressBar spinner;
 
 
-    String newUserIDURL = "http://10.128.116.25/tutorial/newUserID.php";
+    String newUserIDURL = "http://10.128.116.150/tutorial/newUserID.php";
 
 
     @Override
@@ -131,6 +131,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         Log.d("Result", "something went wrong");
+                        spinner.setVisibility(View.GONE);
                         requestQueue.stop();
                     }
                 }) {
@@ -188,49 +189,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
        // getLocation();
     }
-
-    /*private void getLocation() {
-        if (ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION)
-                != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission
-                (MapsActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.d("getLocation", "Permission needed");
-            ActivityCompat.requestPermissions(MapsActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_LOCATION);
-
-        } else {
-
-            Location location = null;
-            criteria = new Criteria();
-            bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true));
-            location = locationManager.requestLocationUpdates(bestProvider, 1000, 0, this);
-
-            getLocation();
-
-
-
-            Log.d("getLocation", "Getting location");
-            if (location != null) {
-                double latti = location.getLatitude();
-                double longi = location.getLongitude();
-                String lattitude = String.valueOf(latti);
-                String longitude = String.valueOf(longi);
-
-                Log.d("getLocation", "Lattitude = " + lattitude +
-                        " Longitude = " + longitude);
-
-                // Add a marker in Sydney and move the camera
-                LatLng currentLocation = new LatLng(latti, longi);
-                mMap.addMarker(new MarkerOptions().position(currentLocation).title("currentLocation"));
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-
-                //Setting text box to coordinates
-                //mTextMessage.setText("Your current location is"+ "\n" + "Lattitude = " + lattitude
-                //        + "\n" + "Longitude = " + longitude);
-            }else{
-                Toast.makeText(this,"Unble to Trace your location",Toast.LENGTH_SHORT).show();
-            }
-        }
-    }
-    */
 
     protected void getLocation() {
         if (isLocationEnabled(MapsActivity.this)) {
