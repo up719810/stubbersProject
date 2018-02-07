@@ -64,7 +64,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ProgressBar spinner;
 
 
-    String newUserIDURL = "http://10.128.116.10/tutorial/newUserID.php";
+    String newUserIDURL = "http://10.128.116.251/tutorial/newUserID.php";
+    String updateUserLocationURL = "http://10.128.116.251/tutorial/postCoordinates.php";
 
 
     @Override
@@ -88,11 +89,87 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Log.d("onCreate", "button pressed");
                 getLocation();
 
-                int userIDTest = prefs.getInt("usersID", 0 );
-                Log.d("onCreate", String.valueOf(userIDTest));
+                updateUsersLocation(getApplicationContext());
+
+
             }
         });
 
+
+    }
+
+    public void updateUsersLocation(Context context){
+
+        requestQueue.getCache().clear();
+
+        final SharedPreferences prefs = context.getSharedPreferences(
+                "com.example.williamdunnett.mapstest2", Context.MODE_PRIVATE);
+
+        final int userID = prefs.getInt("userID",0);
+        final String lattitude = prefs.getString("lattitude", null);
+        final String longitude = prefs.getString("longitude", null);
+
+        Log.d("updateUsersLocation", "called");
+        Log.d("userID", String.valueOf(userID));
+        Log.d("lattitude", lattitude);
+        Log.d("longitude", longitude);
+
+
+        StringRequest jsonObjRequest = new StringRequest(Request.Method.POST,
+                updateUserLocationURL,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        Log.d("Result", "response: " + response);
+
+                        try {
+                            JSONObject obj = new JSONObject(response);
+                            //Log.d("Result", obj.toString());
+
+                        } catch (Throwable t) {
+                            Log.e("My App", "Could not parse malformed JSON: \"" + response + "\"");
+                        }
+
+                        spinner.setVisibility(View.GONE);
+                        requestQueue.stop();
+                    }
+                }, new Response.ErrorListener() {
+
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.d("Result", "something went wrong");
+                spinner.setVisibility(View.GONE);
+                requestQueue.stop();
+
+            }
+        }) {
+
+            @Override
+            public String getBodyContentType() {
+                return "application/x-www-form-urlencoded; charset=UTF-8";
+            }
+
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+
+                //TODO This is not getting called for some reason
+                Log.d("getParams update coord", "called");
+                Map<String, String> postParam = new HashMap<String, String>();
+
+                Log.d("userID", String.valueOf(userID));
+                Log.d("lattitude", lattitude);
+                Log.d("longitude", longitude);
+
+                postParam.put("usersID",String.valueOf(userID));
+                postParam.put("lattitude",lattitude);
+                postParam.put("longitude", longitude);
+
+                return postParam;
+            }
+
+        };
+
+        requestQueue.add(jsonObjRequest);
 
     }
 
@@ -121,10 +198,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public class ViewDialog {
 
-        public void showDialog(Activity activity, String msg) {
+        public void showDialog(final Activity activity, String msg) {
 
-            //TODO get shared prefs working
-            
             final Dialog dialog = new Dialog(activity);
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             dialog.setCancelable(false);
@@ -164,8 +239,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         //Log.d("Result", obj.toString());
                                         int resultID = obj.getInt("userID");    //result is key for which you need to retrieve data
                                         Log.d("Result", "userID: " + resultID);
-                                        //prefs.edit().putInt("usersID", resultID).apply();
-                                        //TODO store userID in userPrefs for use in post coordinates
+
+                                        addToSharedPrefsInt(activity, "userID", resultID);
+
                                     } catch (Throwable t) {
                                         Log.e("My App", "Could not parse malformed JSON: \"" + response + "\"");
                                     }
@@ -180,6 +256,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             Log.d("Result", "something went wrong");
                             spinner.setVisibility(View.GONE);
                             requestQueue.stop();
+
                         }
                     }) {
 
@@ -191,7 +268,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         @Override
                         protected Map<String, String> getParams() throws AuthFailureError {
 
-
+                            Log.d("getParams new user", "called");
                             Map<String, String> postParam = new HashMap<String, String>();
 
                             postParam.put("usersName",nameUser);
@@ -212,6 +289,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    //@params activity, uniqueID, value
+    //Puts a given int into shared prefs
+    public void addToSharedPrefsInt(Activity activity, String uniqueID, int value) {
+
+        final SharedPreferences prefs = activity.getSharedPreferences(
+                "com.example.williamdunnett.mapstest2", Context.MODE_PRIVATE);
+
+        prefs.edit().putInt(uniqueID, value).apply();
+    }
+
+    //@params activity, uniqueID, value
+    //Puts a given string into shared prefs
+    public void addToSharedPrefsString(Activity activity, String uniqueID, String value) {
+
+        final SharedPreferences prefs = activity.getSharedPreferences(
+                "com.example.williamdunnett.mapstest2", Context.MODE_PRIVATE);
+
+        prefs.edit().putString(uniqueID, value).apply();
+    }
 
     @Override
     protected void onStart()
@@ -221,90 +317,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ViewDialog alertDialoge = new ViewDialog();
         alertDialoge.showDialog(this, "PUT DIALOG TITLE");
 
-        /*
-        final Dialog dialog = new Dialog(this);
-        dialog.setContentView(R.layout.new_user_dialog);
-        dialog.setTitle("Dialog box");
-
-        final EditText name = (EditText)findViewById(R.id.insertName);
-        final Spinner typeMovement = (Spinner) findViewById(R.id.insertMovement);
-        final Spinner sizeGroup = (Spinner) findViewById(R.id.insert_group_size);
-        final ProgressBar spinner = (ProgressBar)findViewById(R.id.progressBar1);
-        final Button newUserbtn = (Button)  findViewById(R.id.newUserbtn);
-        final SharedPreferences prefs = this.getSharedPreferences(
-                "com.example.williamdunnett.mapstest2", Context.MODE_PRIVATE);
-
-        newUserbtn.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                final String nameUser, sizeGroupUser, typeMovementUser;
-                // Do something in response to newUserbtn click
-                Log.d("onStart", "newUserbtn pressed");
-                dialog.dismiss();
-                spinner.setVisibility(View.VISIBLE);
-                nameUser = name.getText().toString();
-                sizeGroupUser = String.valueOf(sizeGroup.getSelectedItem());
-                typeMovementUser = String.valueOf(typeMovement.getSelectedItem());
-
-
-                StringRequest jsonObjRequest = new StringRequest(Request.Method.POST,
-                        newUserIDURL,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                Log.d("Result", "response: " + response);
-
-                                try {
-                                    JSONObject obj = new JSONObject(response);
-                                    //Log.d("Result", obj.toString());
-                                    int resultID = obj.getInt("userID");    //result is key for which you need to retrieve data
-                                    //Log.d("Result", "userID: " + resultID);
-                                    prefs.edit().putInt("usersID", resultID).apply();
-                                    //TODO store userID in userPrefs for use in post coordinates
-                                } catch (Throwable t) {
-                                    Log.e("My App", "Could not parse malformed JSON: \"" + response + "\"");
-                                }
-
-                                spinner.setVisibility(View.GONE);
-                                requestQueue.stop();
-                            }
-                        }, new Response.ErrorListener() {
-
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        Log.d("Result", "something went wrong");
-                        spinner.setVisibility(View.GONE);
-                        requestQueue.stop();
-                    }
-                }) {
-
-                    @Override
-                    public String getBodyContentType() {
-                        return "application/x-www-form-urlencoded; charset=UTF-8";
-                    }
-
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-
-
-                        Map<String, String> postParam = new HashMap<String, String>();
-
-                        postParam.put("usersName",nameUser);
-                        postParam.put("sizeOfParty",sizeGroupUser);
-                        postParam.put("typeOfUser", typeMovementUser);
-
-                        return postParam;
-                    }
-
-                };
-
-                requestQueue.add(jsonObjRequest);
-
-            }
-        });
-
-
-        dialog.show();
-        */
     }
 
 
@@ -313,6 +325,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             locationManager = (LocationManager)  this.getSystemService(Context.LOCATION_SERVICE);
             criteria = new Criteria();
             bestProvider = String.valueOf(locationManager.getBestProvider(criteria, true)).toString();
+
+            Log.d("getLocation", "location is enabled");
 
             //You can still do this if you like, you might get lucky:
 
@@ -324,6 +338,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             } else {
                 Location location = locationManager.getLastKnownLocation(bestProvider);
+                Log.d("getLocation", "permission has been granted");
                 if (location != null) {
                     Log.e("TAG", "GPS is on");
                     double latti = location.getLatitude();
@@ -341,17 +356,38 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     mMap.addMarker(new MarkerOptions().position(currentLocation).title("currentLocation"));
                     mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
 
-                }
-                else{
-                    //This is what you need:
+                    addToSharedPrefsString(this, "lattitude", lattitude);
+                    addToSharedPrefsString(this, "longitude", longitude);
 
+                } else{
+                    //This is what you need:
+                    Log.e("TAG", "GPS is OFF");
                    // locationManager.requestLocationUpdates(bestProvider,Long.valueOf(1000) ,Float.valueOf(0), this);
+
+                    //TODO REMOVE AND MAKE PROPER WORKING CODE
+                    String lattitude = "50.79365";
+                    String longitude = "-1.09776";
+
+                    double latti = Double.valueOf(lattitude);
+                    double longi = Double.valueOf(longitude);
+
+                    Log.d("getLocation", "Lattitude = " + lattitude +
+                            " Longitude = " + longitude);
+
+                    // Add a marker in Portmsouth library and move the camera
+                    LatLng currentLocation = new LatLng(latti, longi);
+                    mMap.addMarker(new MarkerOptions().position(currentLocation).title("currentLocation"));
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
+
+                    addToSharedPrefsString(this, "lattitude", lattitude);
+                    addToSharedPrefsString(this, "longitude", longitude);
                 }
             }
 
         }
         else
         {
+            Log.d("getLocation", "location is NOT enabled");
             //prompt user to enable location....
             //.................
         }
