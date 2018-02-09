@@ -50,6 +50,13 @@
         android:paddingBottom="50dp"
         android:text="@string/show_location_btn" />
 
+    <android.support.v7.widget.AppCompatButton
+        android:id="@+id/button2"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:paddingBottom="50dp"
+        android:text="@string/update_location_btn" />
+
     <ProgressBar
         android:id="@+id/progressBar1"
         style="?android:attr/progressBarStyleLarge"
