@@ -7,9 +7,14 @@
     <string name="types_movement_prompt">Choose a country</string>
     <string name="number_group_prompt">Choose a size of group</string>
     <string name="new_user_btn">New User</string>
+    <string name="change_user_btn">Change User Details</string>
+    <string name="keep_user_btn">Keep these details</string>
     <string name="show_location_btn">Show Location</string>
     <string name="update_location_btn">Update Location</string>
     <string name="new_user_text">Please enter your name, group size and method of transport on site!</string>
+    <string name="old_user_text">Are these details still correct for your group?</string>
+
+
 
     <string-array name="types_movement_array">
         <item>Walking</item>

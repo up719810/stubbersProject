@@ -25,6 +25,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -68,8 +69,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public Timer timer1;
 
 
-    String newUserIDURL = "http://10.128.116.232/tutorial/newUserID.php";
-    String updateUserLocationURL = "http://10.128.116.232/tutorial/postCoordinates.php";
+    String newUserIDURL = "http://10.128.117.217/tutorial/newUserID.php";
+    String updateUserLocationURL = "http://10.128.117.217/tutorial/postCoordinates.php";
 
 
     @Override
@@ -80,6 +81,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         final SharedPreferences prefs = this.getSharedPreferences(
                 "com.example.williamdunnett.mapstest2", Context.MODE_PRIVATE);
+
+        ViewDialog alertDialoge = new ViewDialog();
+
+        //If there is a profile already saved in prefs check if users wants to update it
+        int usersID = prefs.getInt("usersID", 0);
+        if( usersID != 0 ) {
+            //profile saved check if user wants to reuse it
+            alertDialoge.showDialog(this, "oldUserProfile");
+        } else {
+            //no profile previously saved get new one
+            alertDialoge.showDialog(this, "newUser");
+        }
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -221,30 +234,75 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         public void showDialog(final Activity activity, String msg) {
 
             final Dialog dialog = new Dialog(activity);
-            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             dialog.setCancelable(false);
             dialog.setContentView(R.layout.new_user_dialog);
 
-            final EditText name = (EditText)findViewById(R.id.insertName);
-            final Spinner typeMovement = (Spinner) findViewById(R.id.insertMovement);
-            final Spinner sizeGroup = (Spinner) findViewById(R.id.insert_group_size);
+            final LinearLayout showOld = dialog.findViewById(R.id.oldUserProfile);
+            final LinearLayout showNew = dialog.findViewById(R.id.newUserProfile);
+
+            final EditText name = dialog.findViewById(R.id.insertName);
+
+            final Spinner typeMovement = (Spinner) dialog.findViewById(R.id.insertMovement);
+            final Spinner sizeGroup = (Spinner) dialog.findViewById(R.id.insert_group_size);
+
             final ProgressBar spinner = (ProgressBar)findViewById(R.id.progressBar1);
-           // final SharedPreferences prefs = this.getSharedPreferences(
-                    //"com.example.williamdunnett.mapstest2", Context.MODE_PRIVATE);
 
             Button newUserBtn = (Button) dialog.findViewById(R.id.newUserbtn);
+            Button changeUserBtn = dialog.findViewById(R.id.changeUserBtn);
+            Button keepUserBtn = dialog.findViewById(R.id.keepUserBtn);
+
+            TextView oldName = dialog.findViewById(R.id.oldUserProfileName);
+            TextView oldGroupSize = dialog.findViewById(R.id.oldUserProfileGroupSize);
+            TextView oldMethodMovement = dialog.findViewById(R.id.oldUserProfileMovement);
+
+           final SharedPreferences prefs = activity.getSharedPreferences(
+                   "com.example.williamdunnett.mapstest2", Context.MODE_PRIVATE);
+
+            Log.d("showDialog", "msg: " + msg);
+
+            if(msg.equals("oldUserProfile")) {
+                showOld.setVisibility(View.VISIBLE);
+                showNew.setVisibility(View.GONE);
+
+                oldName.setText(prefs.getString("oldUserProfileName", ""));
+                oldGroupSize.setText(prefs.getString("oldUserProfileGroupSize", ""));
+                oldMethodMovement.setText(prefs.getString("oldUserProfileMovement", ""));
+
+
+            } else {
+                showOld.setVisibility(View.GONE);
+                showNew.setVisibility(View.VISIBLE);
+            }
+
+
+            //Change user button pressed
+            changeUserBtn.setOnClickListener(new View.OnClickListener() {
+                 public void onClick(View v) {
+                     showOld.setVisibility(View.GONE);
+                     showNew.setVisibility(View.VISIBLE);
+                 }
+             });
+
+            //Keep user button pressed
+            keepUserBtn.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    dialog.dismiss();
+                }
+            });
 
             newUserBtn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    final String nameUser, sizeGroupUser, typeMovementUser;
+                    final String sizeGroupUser, typeMovementUser, nameUser;
+
+
                     // Do something in response to newUserbtn click
                     Log.d("onStart", "newUserbtn pressed");
                     dialog.dismiss();
                     spinner.setVisibility(View.VISIBLE);
+
                     nameUser = name.getText().toString();
                     sizeGroupUser = String.valueOf(sizeGroup.getSelectedItem());
                     typeMovementUser = String.valueOf(typeMovement.getSelectedItem());
-
 
                     StringRequest jsonObjRequest = new StringRequest(Request.Method.POST,
                             newUserIDURL,
@@ -259,7 +317,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         int resultID = obj.getInt("userID");    //result is key for which you need to retrieve data
                                         Log.d("Result", "userID: " + resultID);
 
-                                        addToSharedPrefsInt(activity, "userID", resultID);
+                                        addToSharedPrefsInt(activity, "usersID", resultID);
+                                        addToSharedPrefsString(activity, "oldUserProfileName", nameUser);
+                                        addToSharedPrefsString(activity, "oldUserProfileGroupSize", sizeGroupUser);
+                                        addToSharedPrefsString(activity, "oldUserProfileMovement", typeMovementUser);
+
 
                                     } catch (Throwable t) {
                                         Log.e("My App", "Could not parse malformed JSON: \"" + response + "\"");
@@ -288,7 +350,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         protected Map<String, String> getParams() throws AuthFailureError {
 
                             Log.d("getParams new user", "called");
+
+
+                            //String nameUser = MapsActivity.this.name.getText().toString();
                             Log.d("getParams new user", "usersName: " + nameUser);
+
 
                             Map<String, String> postParam = new HashMap<String, String>();
 
@@ -335,10 +401,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     {
         super.onStart();
 
-        ViewDialog alertDialoge = new ViewDialog();
-        alertDialoge.showDialog(this, "PUT DIALOG TITLE");
-
+        Log.d("onStart", "called");
     }
+
+    @Override
+    protected void onResume()
+    {
+        super.onResume();
+
+        Log.d("onResume", "called");
+    }
+
+    @Override
+    protected void onPause()
+    {
+        super.onPause();
+
+        Log.d("onPause", "called");
+    }
+
+
 
 
     protected void getLocation() {
@@ -382,54 +464,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 timer1=new Timer();
                 timer1.schedule(new GetLastLocation(), 20000);
 
-                /*
-                Location location = locationManager.getLastKnownLocation(bestProvider);
-                Log.d("getLocation", "permission has been granted");
-                if (location != null) {
-                    Log.e("TAG", "GPS is on");
-                    double latti = location.getLatitude();
-                    double longi = location.getLongitude();
-                    //double latti = 80;
-                    //double longi = 80;
-                    String lattitude = String.valueOf(latti);
-                    String longitude = String.valueOf(longi);
-
-                    Log.d("getLocation", "Lattitude = " + lattitude +
-                            " Longitude = " + longitude);
-
-                    // Add a marker in Sydney and move the camera
-                    LatLng currentLocation = new LatLng(latti, longi);
-                    mMap.addMarker(new MarkerOptions().position(currentLocation).title("currentLocation"));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-                    //mMap.
-
-                    addToSharedPrefsString(this, "lattitude", lattitude);
-                    addToSharedPrefsString(this, "longitude", longitude);
-
-                } else{
-                    //This is what you need:
-                    Log.e("TAG", "GPS is OFF");
-                    locationManager.requestLocationUpdates(bestProvider,Long.valueOf(1000) ,Float.valueOf(0), locationListenerGps);
-
-                    //TODO REMOVE AND MAKE PROPER WORKING CODE
-                    String lattitude = "50.79365";
-                    String longitude = "-1.09776";
-
-                    double latti = Double.valueOf(lattitude);
-                    double longi = Double.valueOf(longitude);
-
-                    Log.d("getLocation", "Lattitude = " + lattitude +
-                            " Longitude = " + longitude);
-
-                    // Add a marker in Portmsouth library and move the camera
-                    LatLng currentLocation = new LatLng(latti, longi);
-                    mMap.addMarker(new MarkerOptions().position(currentLocation).title("currentLocation"));
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-
-                    addToSharedPrefsString(this, "lattitude", lattitude);
-                    addToSharedPrefsString(this, "longitude", longitude);
-                }
-            */
             }
 
         }
