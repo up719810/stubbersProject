@@ -56,6 +56,8 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javax.xml.datatype.Duration;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -69,8 +71,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public Timer timer1;
 
 
-    String newUserIDURL = "http://10.128.117.217/tutorial/newUserID.php";
-    String updateUserLocationURL = "http://10.128.117.217/tutorial/postCoordinates.php";
+    String newUserIDURL = "http://10.128.116.181/tutorial/newUserID.php";
+    String updateUserLocationURL = "http://10.128.116.181/tutorial/postCoordinates.php";
 
 
     @Override
@@ -100,6 +102,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         get_loc_btn = (Button)  findViewById(R.id.button1);
+
+        /*
         get_loc_btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Do something in response to button click
@@ -109,6 +113,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+        */
 
         update_location_btn  = (Button)  findViewById(R.id.button2);
         update_location_btn.setOnClickListener(new View.OnClickListener() {
@@ -322,6 +327,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                         addToSharedPrefsString(activity, "oldUserProfileGroupSize", sizeGroupUser);
                                         addToSharedPrefsString(activity, "oldUserProfileMovement", typeMovementUser);
 
+                                        getLocation();
+
 
                                     } catch (Throwable t) {
                                         Log.e("My App", "Could not parse malformed JSON: \"" + response + "\"");
@@ -337,6 +344,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             Log.d("Result", "something went wrong");
                             spinner.setVisibility(View.GONE);
                             requestQueue.stop();
+
+                            Toast.makeText(activity, "Something has gone wrogn please hard quit app and load again", Toast.LENGTH_LONG);
+
+                            getLocation();
 
                         }
                     }) {
