@@ -11,8 +11,14 @@
     <string name="keep_user_btn">Keep these details</string>
     <string name="show_location_btn">Show Location</string>
     <string name="update_location_btn">Update Location</string>
-    <string name="new_user_text">Please enter your name, group size and method of transport on site!</string>
+    <string name="new_user_text">Name</string>
     <string name="old_user_text">Are these details still correct for your group?</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="profile_change">Update Profile</string>
+    <string name="opening_times">Opening Times</string>
+    <string name="about">About Stubbers</string>
+    <string name="back_map">Stubbers Map</string>
 
 
 

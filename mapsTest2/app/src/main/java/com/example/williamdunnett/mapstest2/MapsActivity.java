@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -16,16 +17,28 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Handler;
 import android.provider.Settings;
+import android.support.design.widget.NavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -58,7 +71,7 @@ import java.util.TimerTask;
 
 import javax.xml.datatype.Duration;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
     private LocationManager locationManager;
@@ -69,10 +82,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     RequestQueue requestQueue;
     public ProgressBar spinner;
     public Timer timer1;
+    private ArrayAdapter<String> mAdapter;
 
+    private ActionBarDrawerToggle mDrawerToggle;
+    private DrawerLayout mDrawerLayout;
+    private String mActivityTitle;
 
-    String newUserIDURL = "http://10.128.116.181/tutorial/newUserID.php";
-    String updateUserLocationURL = "http://10.128.116.181/tutorial/postCoordinates.php";
+    String newUserIDURL = "http://dunnettwill.zapto.org/tutorial/newUserID.php";
+    String updateUserLocationURL = "http://dunnettwill.zapto.org/tutorial/postCoordinates.php";
 
 
     @Override
@@ -84,10 +101,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final SharedPreferences prefs = this.getSharedPreferences(
                 "com.example.williamdunnett.mapstest2", Context.MODE_PRIVATE);
 
-        ViewDialog alertDialoge = new ViewDialog();
+        final ViewDialog alertDialoge = new ViewDialog();
+        mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
+        mActivityTitle = getTitle().toString();
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.getMenu().getItem(0).setChecked(true);
+        navigationView.setCheckedItem(R.id.map);
+        navigationView.setNavigationItemSelectedListener(
+                new NavigationView.OnNavigationItemSelectedListener() {
+                    @Override
+                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                        // set item as selected to persist highlight
+                        menuItem.setChecked(true);
+                        // close drawer when item is tapped
+                        mDrawerLayout.closeDrawers();
+
+                        //TODO Update this to do the required things
+
+                        switch (menuItem.getItemId()) {
+                            case R.id.map:
+                                MapsActivity.this.setTitle("Map");
+                                break;
+                            case R.id.user_profile_change:
+                                //MapsActivity.this.setTitle("User Profile");
+                                alertDialoge.showDialog(MapsActivity.this, "oldUserProfile");
+                                break;
+                            case R.id.opening_times:
+                                MapsActivity.this.setTitle("Opening Times");
+                                break;
+                            case R.id.about:
+                                MapsActivity.this.setTitle("About");
+                                break;
+                        }
+                        // Add code here to update the UI based on the item selected
+                        // For example, swap UI fragments here
+
+                        return true;
+                    }
+                });
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        ActionBar actionbar = getSupportActionBar();
+        actionbar.setDisplayHomeAsUpEnabled(true);
+        actionbar.setHomeAsUpIndicator(R.drawable.ic_menu);
+
 
         //If there is a profile already saved in prefs check if users wants to update it
         int usersID = prefs.getInt("usersID", 0);
+        Log.d("onCreate", "usersID: " + usersID);
         if( usersID != 0 ) {
             //profile saved check if user wants to reuse it
             alertDialoge.showDialog(this, "oldUserProfile");
@@ -115,6 +178,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         });
         */
 
+        //Hidden now, not used
         update_location_btn  = (Button)  findViewById(R.id.button2);
         update_location_btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -125,8 +189,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             }
         });
+    }
 
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                mDrawerLayout.openDrawer(GravityCompat.START);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     /**
@@ -163,13 +236,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             final SharedPreferences prefs = activity.getSharedPreferences(
                     "com.example.williamdunnett.mapstest2", Context.MODE_PRIVATE);
 
-            final int userID = prefs.getInt("userID",0);
-            final String lattitude = prefs.getString("lattitude", null);
+            final int usersID = prefs.getInt("usersID", 0);
+            final String latitude = prefs.getString("latitude", null);
             final String longitude = prefs.getString("longitude", null);
 
             Log.d("updateUsersLocation", "called");
-            Log.d("userID", String.valueOf(userID));
-            Log.d("lattitude", lattitude);
+            Log.d("usersID", String.valueOf(usersID));
+            Log.d("latitude", latitude);
             Log.d("longitude", longitude);
 
 
@@ -210,18 +283,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 @Override
                 protected Map<String, String> getParams() throws AuthFailureError {
 
-                    //TODO This is not getting called for some reason
                     Log.d("getParams update coord", "called");
                     Map<String, String> postParam = new HashMap<String, String>();
 
-                    Log.d("userID", String.valueOf(userID));
-                    Log.d("lattitude", lattitude);
+                    Log.d("usersID", String.valueOf(usersID));
+                    Log.d("latitude", latitude);
                     Log.d("longitude", longitude);
 
-                    postParam.put("usersID",String.valueOf(userID));
-                    postParam.put("lattitude",lattitude);
+                    postParam.put("usersID",String.valueOf(usersID));
+                    postParam.put("latitude",latitude);
                     postParam.put("longitude", longitude);
 
+                    Log.d("postParam", postParam.toString());
                     return postParam;
                 }
 
@@ -269,9 +342,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 showOld.setVisibility(View.VISIBLE);
                 showNew.setVisibility(View.GONE);
 
-                oldName.setText(prefs.getString("oldUserProfileName", ""));
-                oldGroupSize.setText(prefs.getString("oldUserProfileGroupSize", ""));
-                oldMethodMovement.setText(prefs.getString("oldUserProfileMovement", ""));
+                String oldNameTag = "Name:  " + prefs.getString("oldUserProfileName", "");
+                oldName.setText(oldNameTag);
+                String oldGroupTag = "Group Size:  " + prefs.getString("oldUserProfileGroupSize", "");
+                oldGroupSize.setText(oldGroupTag);
+                String oldMovementTag = "Movement Method:  " + prefs.getString("oldUserProfileMovement", "");
+                oldMethodMovement.setText(oldMovementTag);
+
 
 
             } else {
@@ -291,14 +368,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //Keep user button pressed
             keepUserBtn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
+
                     dialog.dismiss();
+                    getLocation();
+
                 }
             });
 
             newUserBtn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
                     final String sizeGroupUser, typeMovementUser, nameUser;
-
 
                     // Do something in response to newUserbtn click
                     Log.d("onStart", "newUserbtn pressed");
@@ -317,10 +396,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     Log.d("Result", "response: " + response);
 
                                     try {
-                                        JSONObject obj = new JSONObject(response);
-                                        //Log.d("Result", obj.toString());
-                                        int resultID = obj.getInt("userID");    //result is key for which you need to retrieve data
-                                        Log.d("Result", "userID: " + resultID);
+                                        JSONObject obj= new JSONObject(response);
+                                        Log.d("Result", obj.toString());
+                                        int resultID = obj.getInt("usersID");    //result is key for which you need to retrieve data
+                                        Log.d("Result", "usersID: " + resultID);
 
                                         addToSharedPrefsInt(activity, "usersID", resultID);
                                         addToSharedPrefsString(activity, "oldUserProfileName", nameUser);
@@ -524,7 +603,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             if(gps_loc!=null){
                 Log.d("GetLastKnownLocation", "gps_loc: " + gps_loc.toString());
-                //MapsActivity.UpdateLocation.updateServer(gps_loc);
+                //MapsActivity.UpdateLocation.updateServer(MapsActivity.this);
                 return;
             }
             if(net_loc!=null){
@@ -560,10 +639,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             double longi = location.getLongitude();
             //double latti = 80;
             //double longi = 80;
-            String lattitude = String.valueOf(latti);
+            String latitude = String.valueOf(latti);
             String longitude = String.valueOf(longi);
 
-            Log.d("getLocation", "Lattitude = " + lattitude +
+            Log.d("getLocation", "Latitude = " + latitude +
                     " Longitude = " + longitude);
 
             // Add a marker in currentLocation  and move the camera
@@ -573,11 +652,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //mMap.
 
             //TODO change this line to save location in prefs
-            addToSharedPrefsString(MapsActivity.this, "lattitude", lattitude);
+            addToSharedPrefsString(MapsActivity.this, "latitude", latitude);
             addToSharedPrefsString(MapsActivity.this, "longitude", longitude);
             //locationResult.gotLocation(location);
             //locationManager.removeUpdates(this);
+
+            UpdateLocation updateLocationServer = new UpdateLocation();
+            updateLocationServer.updateServer(MapsActivity.this);
             locationManager.removeUpdates(locationListenerGps);
+
         }
         public void onProviderDisabled(String provider) {}
         public void onProviderEnabled(String provider) {}

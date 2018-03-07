@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/map"
+            android:icon="@drawable/ic_map"
+            android:title="@string/back_map" />
+        <item
+            android:id="@+id/user_profile_change"
+            android:icon="@drawable/ic_group"
+            android:title="@string/profile_change" />
+        <item
+            android:id="@+id/opening_times"
+            android:icon="@drawable/ic_access_time"
+            android:title="@string/opening_times" />
+        <item
+            android:id="@+id/about"
+            android:icon="@drawable/ic_info"
+            android:title="@string/about" />
+    </group>
+</menu>
