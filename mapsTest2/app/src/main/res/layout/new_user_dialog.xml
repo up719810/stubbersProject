@@ -78,7 +78,15 @@
             android:hint="@string/new_user_text"
             android:inputType="textPersonName"
             android:id="@+id/insertName"
-            android:visibility="visible"/>
+            android:visibility="visible"
+            android:paddingBottom="10dp"/>
+
+        <android.support.v7.widget.DialogTitle
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/new_user_movement_text"
+            android:textAlignment="center"
+            android:paddingBottom="4dp"/>
 
         <Spinner
             android:id="@+id/insertMovement"
@@ -86,7 +94,15 @@
             android:layout_height="wrap_content"
             android:entries="@array/types_movement_array"
             android:prompt="@string/types_movement_prompt"
-            android:visibility="visible"/>
+            android:visibility="visible"
+            android:paddingBottom="10dp"/>
+
+        <android.support.v7.widget.DialogTitle
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/new_user_group_size_text"
+            android:textAlignment="center"
+            android:paddingBottom="4dp"/>
 
         <Spinner
             android:layout_width="match_parent"
@@ -94,7 +110,8 @@
             android:id="@+id/insert_group_size"
             android:entries="@array/number_group_array"
             android:prompt="@string/number_group_prompt"
-            android:visibility="visible"/>
+            android:visibility="visible"
+            android:paddingBottom="10dp"/>
 
         <Button
             android:id="@+id/newUserbtn"

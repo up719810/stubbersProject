@@ -19,6 +19,10 @@
     <string name="opening_times">Opening Times</string>
     <string name="about">About Stubbers</string>
     <string name="back_map">Stubbers Map</string>
+    <string name="new_user_movement_text">Method of Movement</string>
+    <string name="new_user_group_size_text">Number of People in Group</string>
+
+
 
 
 

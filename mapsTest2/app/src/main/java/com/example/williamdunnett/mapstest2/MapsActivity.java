@@ -82,11 +82,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     RequestQueue requestQueue;
     public ProgressBar spinner;
     public Timer timer1;
-    private ArrayAdapter<String> mAdapter;
 
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerLayout mDrawerLayout;
-    private String mActivityTitle;
 
     String newUserIDURL = "http://dunnettwill.zapto.org/tutorial/newUserID.php";
     String updateUserLocationURL = "http://dunnettwill.zapto.org/tutorial/postCoordinates.php";
@@ -96,14 +94,15 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
-        requestQueue = Volley.newRequestQueue(getApplicationContext());
+
 
         final SharedPreferences prefs = this.getSharedPreferences(
                 "com.example.williamdunnett.mapstest2", Context.MODE_PRIVATE);
 
+
+        //Hamburger menu set up
         final ViewDialog alertDialoge = new ViewDialog();
         mDrawerLayout = (DrawerLayout)findViewById(R.id.drawer_layout);
-        mActivityTitle = getTitle().toString();
 
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.getMenu().getItem(0).setChecked(true);
@@ -134,8 +133,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 MapsActivity.this.setTitle("About");
                                 break;
                         }
-                        // Add code here to update the UI based on the item selected
-                        // For example, swap UI fragments here
 
                         return true;
                     }
@@ -164,9 +161,11 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        //Hidden now, not used
         get_loc_btn = (Button)  findViewById(R.id.button1);
 
-        /*
+
         get_loc_btn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Do something in response to button click
@@ -176,7 +175,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
-        */
 
         //Hidden now, not used
         update_location_btn  = (Button)  findViewById(R.id.button2);
@@ -307,9 +305,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
+    private Boolean numberVerified() {
+
+        return true;
+    }
+
     public class ViewDialog {
 
         public void showDialog(final Activity activity, String msg) {
+
+            requestQueue = Volley.newRequestQueue(getApplicationContext());
 
             final Dialog dialog = new Dialog(activity);
             dialog.setCancelable(false);
@@ -381,86 +386,91 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                     // Do something in response to newUserbtn click
                     Log.d("onStart", "newUserbtn pressed");
-                    dialog.dismiss();
-                    spinner.setVisibility(View.VISIBLE);
 
                     nameUser = name.getText().toString();
                     sizeGroupUser = String.valueOf(sizeGroup.getSelectedItem());
                     typeMovementUser = String.valueOf(typeMovement.getSelectedItem());
 
-                    StringRequest jsonObjRequest = new StringRequest(Request.Method.POST,
-                            newUserIDURL,
-                            new Response.Listener<String>() {
-                                @Override
-                                public void onResponse(String response) {
-                                    Log.d("Result", "response: " + response);
+                    //checking there is a name and it isnt too long for the server
+                    if ((nameUser.length() > 1) & (nameUser.length() < 21)) {
+                        dialog.dismiss();
+                        spinner.setVisibility(View.VISIBLE);
 
-                                    try {
-                                        JSONObject obj= new JSONObject(response);
-                                        Log.d("Result", obj.toString());
-                                        int resultID = obj.getInt("usersID");    //result is key for which you need to retrieve data
-                                        Log.d("Result", "usersID: " + resultID);
+                        StringRequest jsonObjRequest = new StringRequest(Request.Method.POST,
+                                newUserIDURL,
+                                new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+                                        Log.d("Result", "response: " + response);
 
-                                        addToSharedPrefsInt(activity, "usersID", resultID);
-                                        addToSharedPrefsString(activity, "oldUserProfileName", nameUser);
-                                        addToSharedPrefsString(activity, "oldUserProfileGroupSize", sizeGroupUser);
-                                        addToSharedPrefsString(activity, "oldUserProfileMovement", typeMovementUser);
+                                        try {
+                                            JSONObject obj= new JSONObject(response);
+                                            Log.d("Result", obj.toString());
+                                            int resultID = obj.getInt("usersID");    //result is key for which you need to retrieve data
+                                            Log.d("Result", "usersID: " + resultID);
 
-                                        getLocation();
+                                            addToSharedPrefsInt(activity, "usersID", resultID);
+                                            addToSharedPrefsString(activity, "oldUserProfileName", nameUser);
+                                            addToSharedPrefsString(activity, "oldUserProfileGroupSize", sizeGroupUser);
+                                            addToSharedPrefsString(activity, "oldUserProfileMovement", typeMovementUser);
+
+                                            getLocation();
 
 
-                                    } catch (Throwable t) {
-                                        Log.e("My App", "Could not parse malformed JSON: \"" + response + "\"");
+                                        } catch (Throwable t) {
+                                            Log.e("My App", "Could not parse malformed JSON: \"" + response + "\"");
+                                        }
+
+                                        spinner.setVisibility(View.GONE);
+                                        requestQueue.stop();
                                     }
+                                }, new Response.ErrorListener() {
 
-                                    spinner.setVisibility(View.GONE);
-                                    requestQueue.stop();
-                                }
-                            }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                Log.d("Result", "something went wrong");
+                                spinner.setVisibility(View.GONE);
+                                requestQueue.stop();
 
-                        @Override
-                        public void onErrorResponse(VolleyError error) {
-                            Log.d("Result", "something went wrong");
-                            spinner.setVisibility(View.GONE);
-                            requestQueue.stop();
+                                Toast.makeText(activity, "Something has gone wrogn please hard quit app and load again", Toast.LENGTH_LONG);
 
-                            Toast.makeText(activity, "Something has gone wrogn please hard quit app and load again", Toast.LENGTH_LONG);
+                                getLocation();
 
-                            getLocation();
+                            }
+                        }) {
 
-                        }
-                    }) {
+                            @Override
+                            public String getBodyContentType() {
+                                return "application/x-www-form-urlencoded; charset=UTF-8";
+                            }
 
-                        @Override
-                        public String getBodyContentType() {
-                            return "application/x-www-form-urlencoded; charset=UTF-8";
-                        }
+                            @Override
+                            protected Map<String, String> getParams() throws AuthFailureError {
 
-                        @Override
-                        protected Map<String, String> getParams() throws AuthFailureError {
-
-                            Log.d("getParams new user", "called");
+                                Log.d("getParams new user", "called");
 
 
-                            //String nameUser = MapsActivity.this.name.getText().toString();
-                            Log.d("getParams new user", "usersName: " + nameUser);
+                                //String nameUser = MapsActivity.this.name.getText().toString();
+                                Log.d("getParams new user", "usersName: " + nameUser);
 
 
-                            Map<String, String> postParam = new HashMap<String, String>();
+                                Map<String, String> postParam = new HashMap<String, String>();
 
-                            postParam.put("usersName",nameUser);
-                            postParam.put("sizeOfParty",sizeGroupUser);
-                            postParam.put("typeOfUser", typeMovementUser);
+                                postParam.put("usersName",nameUser);
+                                postParam.put("sizeOfParty",sizeGroupUser);
+                                postParam.put("typeOfUser", typeMovementUser);
 
-                            return postParam;
-                        }
+                                return postParam;
+                            }
 
-                    };
+                        };
 
-                    requestQueue.add(jsonObjRequest);
+                        requestQueue.add(jsonObjRequest);
 
-                }
-            });
+                } else {
+                        Log.d("newUserbtnClk","name is too short or too long");
+                    }
+                    }});
             dialog.show();
 
         }
@@ -647,15 +657,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             // Add a marker in currentLocation  and move the camera
             LatLng currentLocation = new LatLng(latti, longi);
-            mMap.addMarker(new MarkerOptions().position(currentLocation).title("currentLocation"));
-            mMap.moveCamera(CameraUpdateFactory.newLatLng(currentLocation));
-            //mMap.
 
-            //TODO change this line to save location in prefs
+            //TODO uncomment this when location working properly so only 1 marker is ever shown
+            mMap.clear();
+            mMap.addMarker(new MarkerOptions().position(currentLocation).title("currentLocation"));
+
+            // Move the camera instantly to location with a zoom of 15.
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18));
+
             addToSharedPrefsString(MapsActivity.this, "latitude", latitude);
             addToSharedPrefsString(MapsActivity.this, "longitude", longitude);
-            //locationResult.gotLocation(location);
-            //locationManager.removeUpdates(this);
 
             UpdateLocation updateLocationServer = new UpdateLocation();
             updateLocationServer.updateServer(MapsActivity.this);
