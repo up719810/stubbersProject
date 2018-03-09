@@ -41,6 +41,12 @@
             android:text="@string/number_group_prompt"
             android:id="@+id/oldUserProfileGroupSize"/>
 
+        <android.support.v7.widget.AppCompatTextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/number_group_prompt"
+            android:id="@+id/oldUserProfileNumber"/>
+
         <Button
             android:id="@+id/changeUserBtn"
             android:layout_width="match_parent"
@@ -110,6 +116,21 @@
             android:id="@+id/insert_group_size"
             android:entries="@array/number_group_array"
             android:prompt="@string/number_group_prompt"
+            android:visibility="visible"
+            android:paddingBottom="10dp"/>
+
+        <android.support.v7.widget.DialogTitle
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/new_user_number"
+            android:textAlignment="center"/>
+
+        <EditText
+            android:layout_width="200dp"
+            android:layout_height="40dp"
+            android:hint="@string/new_user_number"
+            android:inputType="phone"
+            android:id="@+id/insertPhoneNo"
             android:visibility="visible"
             android:paddingBottom="10dp"/>
 

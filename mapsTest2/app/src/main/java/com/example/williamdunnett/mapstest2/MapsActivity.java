@@ -29,6 +29,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -68,6 +69,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.regex.Pattern;
 
 import javax.xml.datatype.Duration;
 
@@ -324,6 +326,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             final LinearLayout showNew = dialog.findViewById(R.id.newUserProfile);
 
             final EditText name = dialog.findViewById(R.id.insertName);
+            final EditText number = dialog.findViewById(R.id.insertPhoneNo);
 
             final Spinner typeMovement = (Spinner) dialog.findViewById(R.id.insertMovement);
             final Spinner sizeGroup = (Spinner) dialog.findViewById(R.id.insert_group_size);
@@ -337,6 +340,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             TextView oldName = dialog.findViewById(R.id.oldUserProfileName);
             TextView oldGroupSize = dialog.findViewById(R.id.oldUserProfileGroupSize);
             TextView oldMethodMovement = dialog.findViewById(R.id.oldUserProfileMovement);
+            TextView oldPhoneNumber = dialog.findViewById(R.id.oldUserProfileNumber);
 
            final SharedPreferences prefs = activity.getSharedPreferences(
                    "com.example.williamdunnett.mapstest2", Context.MODE_PRIVATE);
@@ -353,8 +357,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 oldGroupSize.setText(oldGroupTag);
                 String oldMovementTag = "Movement Method:  " + prefs.getString("oldUserProfileMovement", "");
                 oldMethodMovement.setText(oldMovementTag);
-
-
+                String oldNumberTag = "Phone Number: " + prefs.getString("oldUserProfileNumber", "");
+                oldPhoneNumber.setText(oldNumberTag);
 
             } else {
                 showOld.setVisibility(View.GONE);
@@ -382,17 +386,22 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             newUserBtn.setOnClickListener(new View.OnClickListener() {
                 public void onClick(View v) {
-                    final String sizeGroupUser, typeMovementUser, nameUser;
+                    final String sizeGroupUser, typeMovementUser, nameUser, numberUser;
 
                     // Do something in response to newUserbtn click
                     Log.d("onStart", "newUserbtn pressed");
 
+                    numberUser = number.getText().toString();
                     nameUser = name.getText().toString();
                     sizeGroupUser = String.valueOf(sizeGroup.getSelectedItem());
                     typeMovementUser = String.valueOf(typeMovement.getSelectedItem());
 
+
+
+                    Log.d("newUserBtn","numberValid(numberUser): " + numberValid(numberUser));
+                    Log.d("newUserBtn","nameValid(nameUser): " + nameValid(nameUser));
                     //checking there is a name and it isnt too long for the server
-                    if ((nameUser.length() > 1) & (nameUser.length() < 21)) {
+                    if (nameValid(nameUser) & numberValid(numberUser)) {
                         dialog.dismiss();
                         spinner.setVisibility(View.VISIBLE);
 
@@ -413,6 +422,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                                             addToSharedPrefsString(activity, "oldUserProfileName", nameUser);
                                             addToSharedPrefsString(activity, "oldUserProfileGroupSize", sizeGroupUser);
                                             addToSharedPrefsString(activity, "oldUserProfileMovement", typeMovementUser);
+                                            addToSharedPrefsString(activity, "oldUserProfileNumber", numberUser);
 
                                             getLocation();
 
@@ -456,6 +466,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                                 Map<String, String> postParam = new HashMap<String, String>();
 
+                                postParam.put("usersPhoneNumber", numberUser);
                                 postParam.put("usersName",nameUser);
                                 postParam.put("sizeOfParty",sizeGroupUser);
                                 postParam.put("typeOfUser", typeMovementUser);
@@ -476,6 +487,16 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private Boolean nameValid (String nameUser){
+
+        return ((nameUser.length() > 1) & (nameUser.length() < 21));
+    }
+
+    private Boolean numberValid(String numberUser){
+        Pattern pattern = Patterns.PHONE;
+        return pattern.matcher(numberUser).matches();
+
+    }
     //@params activity, uniqueID, value
     //Puts a given int into shared prefs
     public void addToSharedPrefsInt(Activity activity, String uniqueID, int value) {
@@ -663,7 +684,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.addMarker(new MarkerOptions().position(currentLocation).title("currentLocation"));
 
             // Move the camera instantly to location with a zoom of 15.
-            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 18));
+            mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currentLocation, 19));
 
             addToSharedPrefsString(MapsActivity.this, "latitude", latitude);
             addToSharedPrefsString(MapsActivity.this, "longitude", longitude);
